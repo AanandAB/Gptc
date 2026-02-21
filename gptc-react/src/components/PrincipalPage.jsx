@@ -4,40 +4,6 @@ import Lenis from 'lenis'
 import { ArrowLeft, Phone, Mail, Quote, GraduationCap, Lightbulb, Users, Target } from 'lucide-react'
 
 export default function PrincipalPage() {
-  const lenisRef = useRef(null)
-  const rafIdRef = useRef(null)
-
-  // Initialize Lenis smooth scroll
-  useEffect(() => {
-    window.scrollTo(0, 0)
-
-    const lenis = new Lenis({
-      duration: 1.4,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      lerp: 0.08,
-      wheelMultiplier: 0.8,
-      touchMultiplier: 1.5,
-      smoothWheel: true,
-      smoothTouch: false,
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      infinite: false,
-    })
-    lenisRef.current = lenis
-
-    function raf(time) {
-      lenis.raf(time)
-      rafIdRef.current = requestAnimationFrame(raf)
-    }
-    rafIdRef.current = requestAnimationFrame(raf)
-
-    return () => {
-      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current)
-      lenis.destroy()
-      lenisRef.current = null
-    }
-  }, [])
-
   // Scroll-reveal observer
   useEffect(() => {
     const timer = setTimeout(() => {

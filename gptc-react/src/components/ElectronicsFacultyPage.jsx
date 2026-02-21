@@ -33,23 +33,6 @@ function FacultyCard({ member, index }) {
 }
 
 export default function ElectronicsFacultyPage() {
-  const lenisRef = useRef(null)
-  const rafIdRef = useRef(null)
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-    const lenis = new Lenis({
-      duration: 1.4,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      lerp: 0.08, wheelMultiplier: 0.8, touchMultiplier: 1.5,
-      smoothWheel: true, smoothTouch: false,
-    })
-    lenisRef.current = lenis
-    function raf(time) { lenis.raf(time); rafIdRef.current = requestAnimationFrame(raf) }
-    rafIdRef.current = requestAnimationFrame(raf)
-    return () => { if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current); lenis.destroy() }
-  }, [])
-
   useEffect(() => {
     const timer = setTimeout(() => {
       const observer = new IntersectionObserver(

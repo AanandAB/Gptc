@@ -34,73 +34,40 @@ import ElectricalFacultyPage from './components/ElectricalFacultyPage'
 
 
 
+import SmoothScroll from './components/SmoothScroll'
+
 function HomePage() {
   const [scrolled, setScrolled] = useState(false)
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
   const [loading, setLoading] = useState(true)
-  const lenisRef = useRef(null)
-  const rafIdRef = useRef(null)
   const activeSectionRef = useRef('hero')
 
   // ──────────────────────────────────────────────
-  // 1. LENIS SMOOTH SCROLL — Initialize & Cleanup
+  // 1. SCROLL HANDLING — Basic UI updates
   // ──────────────────────────────────────────────
   useEffect(() => {
-    const lenis = new Lenis({
-      // Core smoothness settings
-      duration: 1.4,                // Duration of scroll animation (seconds)
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),  // Exponential ease-out
-      lerp: 0.08,                   // Linear interpolation intensity (0.01-0.1) — lower = smoother
-      wheelMultiplier: 0.8,         // Reduce wheel sensitivity for smoother feel
-      touchMultiplier: 1.5,         // Keep touch responsive on mobile
-      smoothWheel: true,            // Enable smooth wheel scrolling
-      smoothTouch: false,           // Native touch scroll (feels better on mobile)
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      infinite: false,
-    })
-    lenisRef.current = lenis
-
-    // Throttled scroll handler — avoids React state spam
-    let scrollTicking = false
-    lenis.on('scroll', ({ scroll, velocity }) => {
-      if (!scrollTicking) {
-        scrollTicking = true
-        requestAnimationFrame(() => {
-          setScrolled(scroll > 50)
-          setShowBackToTop(scroll > 600)
-          updateActiveSection(scroll)
-          scrollTicking = false
-        })
-      }
-    })
-
-    // RAF loop — drives Lenis animation
-    function raf(time) {
-      lenis.raf(time)
-      rafIdRef.current = requestAnimationFrame(raf)
+    const handleScroll = () => {
+      const scroll = window.scrollY
+      setScrolled(scroll > 50)
+      setShowBackToTop(scroll > 600)
+      updateActiveSection(scroll)
     }
-    rafIdRef.current = requestAnimationFrame(raf)
 
-    // Cleanup on unmount
-    return () => {
-      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current)
-      lenis.destroy()
-      lenisRef.current = null
-    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   // ──────────────────────────────────────────────
-  // 2. PRELOADER — Stop Lenis during load, start after
+  // 2. PRELOADER & SCROLL LOCK
   // ──────────────────────────────────────────────
   useEffect(() => {
-    if (lenisRef.current) {
-      if (loading) {
-        lenisRef.current.stop()   // Prevent scrolling while preloader is visible
-      } else {
-        lenisRef.current.start()  // Enable scrolling after preloader fades
-      }
+    if (loading) {
+      if (window.lenis) window.lenis.stop()
+      document.body.style.overflow = 'hidden'
+    } else {
+      if (window.lenis) window.lenis.start()
+      document.body.style.overflow = ''
     }
   }, [loading])
 
@@ -110,7 +77,7 @@ function HomePage() {
   }, [])
 
   // ──────────────────────────────────────────────
-  // 3. ACTIVE SECTION TRACKER — Debounced via ref
+  // 3. ACTIVE SECTION TRACKER
   // ──────────────────────────────────────────────
   const updateActiveSection = useCallback((scrollY) => {
     const sections = document.querySelectorAll('section[id]')
@@ -122,7 +89,6 @@ function HomePage() {
         current = section.getAttribute('id')
       }
     })
-    // Only update state if actually changed — avoids unnecessary re-renders
     if (activeSectionRef.current !== current) {
       activeSectionRef.current = current
       setActiveSection(current)
@@ -130,30 +96,21 @@ function HomePage() {
   }, [])
 
   // ──────────────────────────────────────────────
-  // 4. SCROLL-TO FUNCTIONS — Use Lenis scrollTo
+  // 4. SCROLL-TO FUNCTIONS
   // ──────────────────────────────────────────────
   const scrollToSection = useCallback((sectionId) => {
-    if (!lenisRef.current) return
-    const el = document.getElementById(sectionId)
-    if (el) {
-      lenisRef.current.scrollTo(el, {
-        offset: -80,       // Offset for sticky navbar
-        duration: 1.8,     // Smooth duration for nav clicks
-        easing: (t) => 1 - Math.pow(1 - t, 4),  // Quart ease-out for nav scrolls
-      })
+    if (window.lenis) {
+      const el = document.getElementById(sectionId)
+      if (el) window.lenis.scrollTo(el, { offset: -80, duration: 1.8 })
     }
   }, [])
 
   const scrollToTop = useCallback(() => {
-    if (!lenisRef.current) return
-    lenisRef.current.scrollTo(0, {
-      duration: 2.5,       // Longer duration for back-to-top (feels more luxurious)
-      easing: (t) => 1 - Math.pow(1 - t, 5),  // Quint ease-out
-    })
+    if (window.lenis) window.lenis.scrollTo(0, { duration: 2 })
   }, [])
 
   // ──────────────────────────────────────────────
-  // 5. SCROLL-REVEAL OBSERVER — Triggers on scroll
+  // 5. SCROLL-REVEAL OBSERVER
   // ──────────────────────────────────────────────
   useEffect(() => {
     if (loading) return
@@ -171,9 +128,6 @@ function HomePage() {
     return () => observer.disconnect()
   }, [loading])
 
-  // ──────────────────────────────────────────────
-  // 6. RENDER
-  // ──────────────────────────────────────────────
   return (
     <>
       <Preloader loading={loading} />
@@ -183,7 +137,6 @@ function HomePage() {
       <Ticker />
       <ImageSlider />
       <About />
-
       <Principal />
       <VisionMission />
       <Departments />
@@ -201,23 +154,22 @@ function HomePage() {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/principal" element={<PrincipalPage />} />
-        <Route path="/diploma" element={<DiplomaPage />} />
-        <Route path="/classroom-layout" element={<ClassroomLayoutPage />} />
-        <Route path="/department/:deptSlug" element={<DepartmentPage />} />
-        <Route path="/placement-cell" element={<PlacementCellPage />} />
-        <Route path="/mechanical-faculty" element={<MechanicalFacultyPage />} />
-        <Route path="/wood-faculty" element={<WoodFacultyPage />} />
-        <Route path="/textile-faculty" element={<TextileFacultyPage />} />
-        <Route path="/electronics-faculty" element={<ElectronicsFacultyPage />} />
-        <Route path="/civil-faculty" element={<CivilFacultyPage />} />
-        <Route path="/electrical-faculty" element={<ElectricalFacultyPage />} />
-
-
-
-      </Routes>
+      <SmoothScroll>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/principal" element={<PrincipalPage />} />
+          <Route path="/diploma" element={<DiplomaPage />} />
+          <Route path="/classroom-layout" element={<ClassroomLayoutPage />} />
+          <Route path="/department/:deptSlug" element={<DepartmentPage />} />
+          <Route path="/placement-cell" element={<PlacementCellPage />} />
+          <Route path="/mechanical-faculty" element={<MechanicalFacultyPage />} />
+          <Route path="/wood-faculty" element={<WoodFacultyPage />} />
+          <Route path="/textile-faculty" element={<TextileFacultyPage />} />
+          <Route path="/electronics-faculty" element={<ElectronicsFacultyPage />} />
+          <Route path="/civil-faculty" element={<CivilFacultyPage />} />
+          <Route path="/electrical-faculty" element={<ElectricalFacultyPage />} />
+        </Routes>
+      </SmoothScroll>
     </BrowserRouter>
   )
 }
