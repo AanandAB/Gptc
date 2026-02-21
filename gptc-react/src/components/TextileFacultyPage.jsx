@@ -85,7 +85,7 @@ function FacultyCard({ member, index }) {
     <div className="faculty-card faculty-card--with-contact" data-animate="fade-up" data-delay={index * 60}>
       <div className="faculty-card__avatar">
         {member.image ? (
-          <img src={member.image} alt={member.name} loading="lazy" />
+          <img src={`${import.meta.env.BASE_URL}${member.image.replace(/^\//, '')}`} alt={member.name} loading="lazy" />
         ) : (
           <div className="faculty-card__initials">{initials}</div>
         )}
