@@ -153,7 +153,7 @@ function HomePage() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <SmoothScroll>
         <Routes>
           <Route path="/" element={<HomePage />} />
