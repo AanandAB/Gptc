@@ -51,7 +51,7 @@ export default function Navbar({ scrolled, activeSection, onNavigate }) {
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="navbar" role="navigation" aria-label="Main navigation">
         <div className="container navbar__inner">
           <a href="#" className="navbar__brand" onClick={(e) => scrollTo(e, 'hero')} aria-label="GPTC Kannur - Go to homepage">
-            <img src="/logo.png" alt="GPTC Kannur" className="navbar__logo-img" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="GPTC Kannur" className="navbar__logo-img" />
             <div className="navbar__brand-text">
               <span className="navbar__title">Govt. Polytechnic College</span>
               <span className="navbar__subtitle">Kannur, Kerala</span>

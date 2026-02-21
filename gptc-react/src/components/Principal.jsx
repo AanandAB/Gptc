@@ -9,7 +9,7 @@ export default function Principal() {
         <div className="principal__card" data-animate="fade-up">
           <div className="principal__avatar">
             <img
-              src="/images/principal.jpg"
+              src={`${import.meta.env.BASE_URL}images/principal.jpg`}
               alt="Pramod Chathampally - Principal"
               style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
             />

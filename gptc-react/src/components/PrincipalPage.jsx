@@ -33,7 +33,7 @@ export default function PrincipalPage() {
             <span>Back to Home</span>
           </Link>
           <div className="principal-page__nav-brand">
-            <img src="/logo.png" alt="GPTC Kannur" className="navbar__logo-img" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="GPTC Kannur" className="navbar__logo-img" />
             <span>Govt. Polytechnic College, Kannur</span>
           </div>
         </div>
@@ -59,7 +59,7 @@ export default function PrincipalPage() {
               <div className="principal-page__photo-card">
                 <div className="principal-page__photo-wrapper">
                   <img
-                    src="/images/principal.jpg"
+                    src={`${import.meta.env.BASE_URL}images/principal.jpg`}
                     alt="Pramod Chathampally - Principal of Govt. Polytechnic College Thottada"
                     className="principal-page__photo"
                   />

@@ -77,7 +77,7 @@ export default function MechanicalFacultyPage() {
             <span>Back to Mechanical Dept.</span>
           </Link>
           <div className="principal-page__nav-brand">
-            <img src="/logo.png" alt="GPTC Kannur" className="navbar__logo-img" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="GPTC Kannur" className="navbar__logo-img" />
             <span>Govt. Polytechnic College, Kannur</span>
           </div>
         </div>

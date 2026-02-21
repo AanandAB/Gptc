@@ -14,7 +14,7 @@ export default function Footer({ onNavigate }) {
           <div className="footer__grid">
             <div className="footer__brand" data-animate="fade-up">
               <div className="footer__logo">
-                <img src="/logo.png" alt="GPTC Kannur" className="navbar__logo-img navbar__logo-img--lg" />
+                <img src={`${import.meta.env.BASE_URL}logo.png`} alt="GPTC Kannur" className="navbar__logo-img navbar__logo-img--lg" />
                 <div>
                   <h3>Govt. Polytechnic College Kannur</h3>
                   <p className="footer__tagline">Knowledge is Power</p>
