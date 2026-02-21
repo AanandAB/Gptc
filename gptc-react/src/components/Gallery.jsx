@@ -124,7 +124,7 @@ export default function Gallery() {
               >
                 <div className={`gallery__card-skeleton ${imageLoaded[`${activeCategory}-${i}`] ? 'loaded' : ''}`} />
                 <img
-                  src={img.src}
+                  src={`${import.meta.env.BASE_URL}${img.src.replace(/^\//, '')}`}
                   alt={img.caption}
                   loading="lazy"
                   onLoad={() => handleImageLoad(`${activeCategory}-${i}`)}
@@ -188,7 +188,7 @@ export default function Gallery() {
               <img
                 key={activeImage}
                 className="gallery-lightbox__image"
-                src={galleryImages[activeImage].src}
+                src={`${import.meta.env.BASE_URL}${galleryImages[activeImage].src.replace(/^\//, '')}`}
                 alt={galleryImages[activeImage].caption}
                 onLoad={() => setLightboxLoaded(true)}
               />
@@ -206,7 +206,7 @@ export default function Gallery() {
                   onClick={() => { setLightboxLoaded(false); setActiveImage(i) }}
                   aria-label={img.caption}
                 >
-                  <img src={img.src} alt="" />
+                  <img src={`${import.meta.env.BASE_URL}${img.src.replace(/^\//, '')}`} alt="" />
                 </button>
               ))}
             </div>
