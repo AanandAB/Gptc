@@ -124,7 +124,7 @@ export default function PlacementCellPage() {
             <span>Back to Home</span>
           </Link>
           <div className="principal-page__nav-brand">
-            <img src="/logo.png" alt="GPTC Kannur" className="navbar__logo-img" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="GPTC Kannur" className="navbar__logo-img" />
             <span>Govt. Polytechnic College, Kannur</span>
           </div>
         </div>
@@ -208,7 +208,7 @@ export default function PlacementCellPage() {
           <div className="tpc-carousel__track" ref={carouselRef} data-lenis-prevent>
             {galleryImages.map((img, i) => (
               <div className="tpc-carousel__slide" key={i} onClick={() => openLightbox(i)}>
-                <img src={img.src} alt={img.caption} loading="lazy" />
+                <img src={`${import.meta.env.BASE_URL}${img.src.replace(/^\//, '')}`} alt={img.caption} loading="lazy" />
                 <div className="tpc-carousel__caption">
                   <span>{img.caption}</span>
                 </div>
@@ -234,7 +234,7 @@ export default function PlacementCellPage() {
               <ChevronLeft size={32} />
             </button>
             <div className="placement__lightbox-img-wrap">
-              <img src={galleryImages[lightboxIndex].src} alt={galleryImages[lightboxIndex].caption} />
+              <img src={`${import.meta.env.BASE_URL}${galleryImages[lightboxIndex].src.replace(/^\//, '')}`} alt={galleryImages[lightboxIndex].caption} />
               <div className="placement__lightbox-caption">
                 <span>{lightboxIndex + 1} / {galleryImages.length}</span>
                 <span>{galleryImages[lightboxIndex].caption}</span>
@@ -252,7 +252,7 @@ export default function PlacementCellPage() {
                 className={`placement__lightbox-thumb ${i === lightboxIndex ? 'active' : ''}`}
                 onClick={() => setLightboxIndex(i)}
               >
-                <img src={img.src} alt={img.caption} />
+                <img src={`${import.meta.env.BASE_URL}${img.src.replace(/^\//, '')}`} alt={img.caption} />
               </button>
             ))}
           </div>

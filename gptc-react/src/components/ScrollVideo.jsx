@@ -93,7 +93,7 @@ export default function ScrollVideo() {
           <video
             ref={videoRef}
             className={`scroll-video__player ${videoReady ? 'ready' : ''}`}
-            src="/videos/campus-scroll.mp4"
+            src={`${import.meta.env.BASE_URL}videos/campus-scroll.mp4`}
             muted={isMuted}
             playsInline
             preload="auto"
