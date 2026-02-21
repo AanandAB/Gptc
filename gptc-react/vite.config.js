@@ -7,5 +7,22 @@ export default defineConfig(({ command }) => ({
   server: {
     port: 3000,
     open: true
+  },
+  build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    sourcemap: false,
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['lucide-react', 'lenis'],
+        }
+      }
+    }
+  },
+  esbuild: {
+    drop: ['console', 'debugger'],
   }
 }))

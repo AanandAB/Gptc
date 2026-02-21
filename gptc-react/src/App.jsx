@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react'
+import React, { useEffect, useState, useRef, useCallback, Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Lenis from 'lenis'
 import TopBar from './components/TopBar'
@@ -19,20 +19,17 @@ import Footer from './components/Footer'
 import BackToTop from './components/BackToTop'
 import Preloader from './components/Preloader'
 
-import PrincipalPage from './components/PrincipalPage'
-import DiplomaPage from './components/DiplomaPage'
-import ClassroomLayoutPage from './components/ClassroomLayoutPage'
-import DepartmentPage from './components/DepartmentPage'
-import PlacementCellPage from './components/PlacementCellPage'
-import MechanicalFacultyPage from './components/MechanicalFacultyPage'
-import WoodFacultyPage from './components/WoodFacultyPage'
-import TextileFacultyPage from './components/TextileFacultyPage'
-import ElectronicsFacultyPage from './components/ElectronicsFacultyPage'
-import CivilFacultyPage from './components/CivilFacultyPage'
-import ElectricalFacultyPage from './components/ElectricalFacultyPage'
-
-
-
+const PrincipalPage = lazy(() => import('./components/PrincipalPage'))
+const DiplomaPage = lazy(() => import('./components/DiplomaPage'))
+const ClassroomLayoutPage = lazy(() => import('./components/ClassroomLayoutPage'))
+const DepartmentPage = lazy(() => import('./components/DepartmentPage'))
+const PlacementCellPage = lazy(() => import('./components/PlacementCellPage'))
+const MechanicalFacultyPage = lazy(() => import('./components/MechanicalFacultyPage'))
+const WoodFacultyPage = lazy(() => import('./components/WoodFacultyPage'))
+const TextileFacultyPage = lazy(() => import('./components/TextileFacultyPage'))
+const ElectronicsFacultyPage = lazy(() => import('./components/ElectronicsFacultyPage'))
+const CivilFacultyPage = lazy(() => import('./components/CivilFacultyPage'))
+const ElectricalFacultyPage = lazy(() => import('./components/ElectricalFacultyPage'))
 
 import SmoothScroll from './components/SmoothScroll'
 
@@ -155,20 +152,22 @@ function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <SmoothScroll>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/principal" element={<PrincipalPage />} />
-          <Route path="/diploma" element={<DiplomaPage />} />
-          <Route path="/classroom-layout" element={<ClassroomLayoutPage />} />
-          <Route path="/department/:deptSlug" element={<DepartmentPage />} />
-          <Route path="/placement-cell" element={<PlacementCellPage />} />
-          <Route path="/mechanical-faculty" element={<MechanicalFacultyPage />} />
-          <Route path="/wood-faculty" element={<WoodFacultyPage />} />
-          <Route path="/textile-faculty" element={<TextileFacultyPage />} />
-          <Route path="/electronics-faculty" element={<ElectronicsFacultyPage />} />
-          <Route path="/civil-faculty" element={<CivilFacultyPage />} />
-          <Route path="/electrical-faculty" element={<ElectricalFacultyPage />} />
-        </Routes>
+        <Suspense fallback={<div style={{height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)'}}><div className="preloader__spinner"></div></div>}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/principal" element={<PrincipalPage />} />
+            <Route path="/diploma" element={<DiplomaPage />} />
+            <Route path="/classroom-layout" element={<ClassroomLayoutPage />} />
+            <Route path="/department/:deptSlug" element={<DepartmentPage />} />
+            <Route path="/placement-cell" element={<PlacementCellPage />} />
+            <Route path="/mechanical-faculty" element={<MechanicalFacultyPage />} />
+            <Route path="/wood-faculty" element={<WoodFacultyPage />} />
+            <Route path="/textile-faculty" element={<TextileFacultyPage />} />
+            <Route path="/electronics-faculty" element={<ElectronicsFacultyPage />} />
+            <Route path="/civil-faculty" element={<CivilFacultyPage />} />
+            <Route path="/electrical-faculty" element={<ElectricalFacultyPage />} />
+          </Routes>
+        </Suspense>
       </SmoothScroll>
     </BrowserRouter>
   )
