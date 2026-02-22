@@ -1644,6 +1644,9 @@ img{max-width:100%;height:auto;display:block}
     hsl(var(--dept-hue,200) 55% 35%),
     hsl(var(--dept-hue,200) 40% 20%)
   );
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
 }
 .dept-page__hero-overlay{
   position:absolute;
