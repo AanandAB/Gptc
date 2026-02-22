@@ -60,14 +60,6 @@ export default function DepartmentPage() {
   if (!dept) {
     return (
       <div className="subpage">
-        <nav className="principal-page__nav">
-          <div className="container principal-page__nav-inner">
-            <Link to="/" className="principal-page__back">
-              <ArrowLeft size={20} />
-              <span>Back to Home</span>
-            </Link>
-          </div>
-        </nav>
         <div className="container" style={{ padding: '120px 0', textAlign: 'center' }}>
           <h2>Department not found</h2>
           <Link to="/" className="btn btn--primary" style={{ marginTop: 24 }}>Go Home</Link>
@@ -80,23 +72,9 @@ export default function DepartmentPage() {
 
   return (
     <div className="subpage">
-      {/* Nav */}
-      <nav className="principal-page__nav">
-        <div className="container principal-page__nav-inner">
-          <Link to="/" className="principal-page__back">
-            <ArrowLeft size={20} />
-            <span>Back to Home</span>
-          </Link>
-          <div className="principal-page__nav-brand">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="GPTC Kannur" className="navbar__logo-img" />
-            <span>Govt. Polytechnic College, Kannur</span>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero */}
       <section className="dept-page__hero" style={{ '--dept-hue': dept.hue }}>
-        <div className="dept-page__hero-bg"></div>
+        <div className="dept-page__hero-bg" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}images/${deptSlug}.png)` }}></div>
         <div className="dept-page__hero-overlay"></div>
         <div className="container dept-page__hero-content">
           <div className="dept-page__hero-icon">

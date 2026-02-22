@@ -43,31 +43,43 @@ export default function Hero({ onNavigate }) {
     return () => clearInterval(interval)
   }, [])
 
-  // Parallax on scroll
+  // 3D Parallax on mouse move
   useEffect(() => {
-    let ticking = false
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          if (!heroRef.current || !contentRef.current) return
-          const scrollY = window.scrollY || document.documentElement.scrollTop
-          const heroH = heroRef.current.offsetHeight
-          if (scrollY < heroH) {
-            contentRef.current.style.transform = `translateY(${scrollY * 0.35}px)`
-            contentRef.current.style.opacity = 1 - (scrollY / heroH) * 0.7
-            const shapes = heroRef.current.querySelectorAll('.hero__shape')
-            shapes.forEach((s, i) => {
-              const speed = 0.05 + i * 0.03
-              s.style.transform = `translateY(${scrollY * speed}px)`
-            })
-          }
-          ticking = false
-        })
-        ticking = true
+    const handleMouseMove = (e) => {
+      if (!heroRef.current || !contentRef.current) return
+      const { innerWidth, innerHeight } = window
+      const x = (e.clientX - innerWidth / 2) / (innerWidth / 2)
+      const y = (e.clientY - innerHeight / 2) / (innerHeight / 2)
+
+      const shapes = heroRef.current.querySelectorAll('.hero__shape')
+      shapes.forEach((s, i) => {
+        const speed = (i + 1) * 15
+        s.style.transform = `translate(${x * speed}px, ${y * speed}px)`
+      })
+
+      // Slight 3D tilt on content
+      contentRef.current.style.transform = `perspective(1000px) rotateX(${-y * 5}deg) rotateY(${x * 5}deg) translateZ(20px)`
+    }
+    
+    const resetTransform = () => {
+      if (!contentRef.current) return
+      contentRef.current.style.transform = `perspective(1000px) rotateX(0) rotateY(0) translateZ(0)`
+      const shapes = heroRef.current?.querySelectorAll('.hero__shape')
+      shapes?.forEach(s => s.style.transform = `translate(0, 0)`)
+    }
+
+    const heroEl = heroRef.current
+    if (heroEl) {
+      heroEl.addEventListener('mousemove', handleMouseMove)
+      heroEl.addEventListener('mouseleave', resetTransform)
+    }
+    
+    return () => {
+      if (heroEl) {
+        heroEl.removeEventListener('mousemove', handleMouseMove)
+        heroEl.removeEventListener('mouseleave', resetTransform)
       }
     }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (

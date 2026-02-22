@@ -34,11 +34,8 @@ const ElectricalFacultyPage = lazy(() => import('./components/ElectricalFacultyP
 import SmoothScroll from './components/SmoothScroll'
 
 function HomePage() {
-  const [scrolled, setScrolled] = useState(false)
   const [showBackToTop, setShowBackToTop] = useState(false)
-  const [activeSection, setActiveSection] = useState('hero')
   const [loading, setLoading] = useState(true)
-  const activeSectionRef = useRef('hero')
 
   // ──────────────────────────────────────────────
   // 1. SCROLL HANDLING — Basic UI updates
@@ -46,9 +43,7 @@ function HomePage() {
   useEffect(() => {
     const handleScroll = () => {
       const scroll = window.scrollY
-      setScrolled(scroll > 50)
       setShowBackToTop(scroll > 600)
-      updateActiveSection(scroll)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -71,25 +66,6 @@ function HomePage() {
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1400)
     return () => clearTimeout(timer)
-  }, [])
-
-  // ──────────────────────────────────────────────
-  // 3. ACTIVE SECTION TRACKER
-  // ──────────────────────────────────────────────
-  const updateActiveSection = useCallback((scrollY) => {
-    const sections = document.querySelectorAll('section[id]')
-    let current = 'hero'
-    sections.forEach(section => {
-      const rect = section.getBoundingClientRect()
-      const top = rect.top + scrollY - 160
-      if (scrollY >= top && scrollY < top + section.offsetHeight) {
-        current = section.getAttribute('id')
-      }
-    })
-    if (activeSectionRef.current !== current) {
-      activeSectionRef.current = current
-      setActiveSection(current)
-    }
   }, [])
 
   // ──────────────────────────────────────────────
@@ -128,8 +104,6 @@ function HomePage() {
   return (
     <>
       <Preloader loading={loading} />
-      <TopBar />
-      <Navbar scrolled={scrolled} activeSection={activeSection} onNavigate={scrollToSection} />
       <Hero onNavigate={scrollToSection} />
       <Ticker />
       <ImageSlider />
@@ -148,26 +122,36 @@ function HomePage() {
   )
 }
 
+function MainLayout() {
+  return (
+    <>
+      <TopBar />
+      <Navbar />
+      <Suspense fallback={<div style={{height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)'}}><div className="preloader__spinner"></div></div>}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/principal" element={<PrincipalPage />} />
+          <Route path="/diploma" element={<DiplomaPage />} />
+          <Route path="/classroom-layout" element={<ClassroomLayoutPage />} />
+          <Route path="/department/:deptSlug" element={<DepartmentPage />} />
+          <Route path="/placement-cell" element={<PlacementCellPage />} />
+          <Route path="/mechanical-faculty" element={<MechanicalFacultyPage />} />
+          <Route path="/wood-faculty" element={<WoodFacultyPage />} />
+          <Route path="/textile-faculty" element={<TextileFacultyPage />} />
+          <Route path="/electronics-faculty" element={<ElectronicsFacultyPage />} />
+          <Route path="/civil-faculty" element={<CivilFacultyPage />} />
+          <Route path="/electrical-faculty" element={<ElectricalFacultyPage />} />
+        </Routes>
+      </Suspense>
+    </>
+  )
+}
+
 function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <SmoothScroll>
-        <Suspense fallback={<div style={{height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)'}}><div className="preloader__spinner"></div></div>}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/principal" element={<PrincipalPage />} />
-            <Route path="/diploma" element={<DiplomaPage />} />
-            <Route path="/classroom-layout" element={<ClassroomLayoutPage />} />
-            <Route path="/department/:deptSlug" element={<DepartmentPage />} />
-            <Route path="/placement-cell" element={<PlacementCellPage />} />
-            <Route path="/mechanical-faculty" element={<MechanicalFacultyPage />} />
-            <Route path="/wood-faculty" element={<WoodFacultyPage />} />
-            <Route path="/textile-faculty" element={<TextileFacultyPage />} />
-            <Route path="/electronics-faculty" element={<ElectronicsFacultyPage />} />
-            <Route path="/civil-faculty" element={<CivilFacultyPage />} />
-            <Route path="/electrical-faculty" element={<ElectricalFacultyPage />} />
-          </Routes>
-        </Suspense>
+        <MainLayout />
       </SmoothScroll>
     </BrowserRouter>
   )

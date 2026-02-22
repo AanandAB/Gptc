@@ -1,11 +1,40 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 
-export default function Navbar({ scrolled, activeSection, onNavigate }) {
+export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState(null)
+  const [scrolled, setScrolled] = useState(false)
+  const [activeSection, setActiveSection] = useState('hero')
+  
   const navigate = useNavigate()
+  const location = useLocation()
+  const isHome = location.pathname === '/'
+
+  // Track scroll for navbar transparency
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50)
+      if (isHome) {
+        const sections = document.querySelectorAll('section[id]')
+        let current = 'hero'
+        sections.forEach(section => {
+          const rect = section.getBoundingClientRect()
+          const top = rect.top + window.scrollY - 160
+          if (window.scrollY >= top && window.scrollY < top + section.offsetHeight) {
+            current = section.getAttribute('id')
+          }
+        })
+        setActiveSection(current)
+      } else {
+        setActiveSection(null)
+      }
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isHome])
 
   useEffect(() => {
     const handleResize = () => { if (window.innerWidth > 768) { setMenuOpen(false); setOpenDropdown(null) } }
@@ -26,10 +55,25 @@ export default function Navbar({ scrolled, activeSection, onNavigate }) {
 
   const scrollTo = useCallback((e, sectionId) => {
     e.preventDefault()
-    onNavigate(sectionId)
     setMenuOpen(false)
     setOpenDropdown(null)
-  }, [onNavigate])
+
+    if (!isHome) {
+      navigate('/')
+      // Need a slight delay to let the page render before scrolling
+      setTimeout(() => {
+        if (window.lenis) {
+          const el = document.getElementById(sectionId)
+          if (el) window.lenis.scrollTo(el, { offset: -80, duration: 1.8 })
+        }
+      }, 300)
+    } else {
+      if (window.lenis) {
+        const el = document.getElementById(sectionId)
+        if (el) window.lenis.scrollTo(el, { offset: -80, duration: 1.8 })
+      }
+    }
+  }, [isHome, navigate])
 
   const toggleDropdown = useCallback((name) => {
     if (window.innerWidth <= 768) setOpenDropdown(prev => prev === name ? null : name)
@@ -48,7 +92,7 @@ export default function Navbar({ scrolled, activeSection, onNavigate }) {
     <>
       <div className={`navbar__overlay ${menuOpen ? 'active' : ''}`} onClick={() => setMenuOpen(false)} aria-hidden="true" />
 
-      <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="navbar" role="navigation" aria-label="Main navigation">
+      <nav className={`navbar ${scrolled ? 'scrolled' : ''} ${!isHome ? 'navbar--subpage' : ''}`} id="navbar" role="navigation" aria-label="Main navigation">
         <div className="container navbar__inner">
           <a href="#" className="navbar__brand" onClick={(e) => scrollTo(e, 'hero')} aria-label="GPTC Kannur - Go to homepage">
             <img src={`${import.meta.env.BASE_URL}logo.png`} alt="GPTC Kannur" className="navbar__logo-img" />
@@ -59,14 +103,12 @@ export default function Navbar({ scrolled, activeSection, onNavigate }) {
           </a>
 
           <ul className={`navbar__menu ${menuOpen ? 'active' : ''}`} id="nav-menu" role="menubar" data-lenis-prevent>
-            {/* Home */}
             <li role="none">
-              <button className={`navbar__link ${activeSection === 'hero' ? 'active' : ''}`} onClick={(e) => scrollTo(e, 'hero')} role="menuitem">Home</button>
+              <button className={`navbar__link ${isHome && activeSection === 'hero' ? 'active' : ''}`} onClick={(e) => scrollTo(e, 'hero')} role="menuitem">Home</button>
             </li>
 
-            {/* About Us */}
             <li className={`navbar__dropdown ${openDropdown === 'about' ? 'open' : ''}`} role="none">
-              <button className={`navbar__link ${isActive(['about','principal','vision']) ? 'active' : ''}`} onClick={() => toggleDropdown('about')} aria-haspopup="true" aria-expanded={openDropdown === 'about'} role="menuitem">
+              <button className={`navbar__link ${isHome && isActive(['about','principal','vision']) ? 'active' : ''}`} onClick={() => toggleDropdown('about')} aria-haspopup="true" aria-expanded={openDropdown === 'about'} role="menuitem">
                 About Us <ChevronDown className="icon-xs" />
               </button>
               <ul className="navbar__dropdown-menu" role="menu">
@@ -76,9 +118,8 @@ export default function Navbar({ scrolled, activeSection, onNavigate }) {
               </ul>
             </li>
 
-            {/* Departments — links to individual department cards by ID */}
             <li className={`navbar__dropdown ${openDropdown === 'departments' ? 'open' : ''}`} role="none">
-              <button className={`navbar__link ${activeSection === 'departments' ? 'active' : ''}`} onClick={() => toggleDropdown('departments')} aria-haspopup="true" aria-expanded={openDropdown === 'departments'} role="menuitem">
+              <button className={`navbar__link ${isHome && activeSection === 'departments' ? 'active' : ''}`} onClick={() => toggleDropdown('departments')} aria-haspopup="true" aria-expanded={openDropdown === 'departments'} role="menuitem">
                 Departments <ChevronDown className="icon-xs" />
               </button>
               <ul className="navbar__dropdown-menu" role="menu">
@@ -91,9 +132,8 @@ export default function Navbar({ scrolled, activeSection, onNavigate }) {
               </ul>
             </li>
 
-            {/* Academics — mix of section scrolls and external links */}
             <li className={`navbar__dropdown ${openDropdown === 'academics' ? 'open' : ''}`} role="none">
-              <button className={`navbar__link ${activeSection === 'academics' ? 'active' : ''}`} onClick={() => toggleDropdown('academics')} aria-haspopup="true" aria-expanded={openDropdown === 'academics'} role="menuitem">
+              <button className={`navbar__link ${isHome && activeSection === 'academics' ? 'active' : ''}`} onClick={() => toggleDropdown('academics')} aria-haspopup="true" aria-expanded={openDropdown === 'academics'} role="menuitem">
                 Academics <ChevronDown className="icon-xs" />
               </button>
               <ul className="navbar__dropdown-menu" role="menu">
@@ -105,9 +145,8 @@ export default function Navbar({ scrolled, activeSection, onNavigate }) {
               </ul>
             </li>
 
-            {/* Facilities */}
             <li className={`navbar__dropdown ${openDropdown === 'facilities' ? 'open' : ''}`} role="none">
-              <button className={`navbar__link ${activeSection === 'facilities' ? 'active' : ''}`} onClick={() => toggleDropdown('facilities')} aria-haspopup="true" aria-expanded={openDropdown === 'facilities'} role="menuitem">
+              <button className={`navbar__link ${isHome && activeSection === 'facilities' ? 'active' : ''}`} onClick={() => toggleDropdown('facilities')} aria-haspopup="true" aria-expanded={openDropdown === 'facilities'} role="menuitem">
                 Facilities <ChevronDown className="icon-xs" />
               </button>
               <ul className="navbar__dropdown-menu" role="menu">
@@ -120,18 +159,16 @@ export default function Navbar({ scrolled, activeSection, onNavigate }) {
               </ul>
             </li>
 
-            {/* Events */}
             <li role="none">
-              <button className={`navbar__link ${activeSection === 'events' ? 'active' : ''}`} onClick={(e) => scrollTo(e, 'events')} role="menuitem">Events</button>
+              <button className={`navbar__link ${isHome && activeSection === 'events' ? 'active' : ''}`} onClick={(e) => scrollTo(e, 'events')} role="menuitem">Events</button>
             </li>
 
-            {/* Contact */}
             <li role="none">
-              <button className={`navbar__link ${activeSection === 'contact' ? 'active' : ''}`} onClick={(e) => scrollTo(e, 'contact')} role="menuitem">Contact</button>
+              <button className={`navbar__link ${isHome && activeSection === 'contact' ? 'active' : ''}`} onClick={(e) => scrollTo(e, 'contact')} role="menuitem">Contact</button>
             </li>
           </ul>
 
-          <button className={`navbar__toggle ${menuOpen ? 'active' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen}>
+          <button className={`navbar__toggle ${menuOpen ? 'active' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'}>
             <span></span><span></span><span></span>
           </button>
         </div>
