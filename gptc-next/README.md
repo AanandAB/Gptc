@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GPTC Kannur — Next.js + Cloudflare
 
-## Getting Started
+Government Polytechnic College Kannur website migrated to Next.js 16 with Cloudflare Workers, D1 database, and a custom admin panel.
 
-First, run the development server:
+## Tech Stack
+
+- **Frontend**: Next.js 16 (App Router), React 19, Lenis smooth scroll
+- **Backend**: Cloudflare Workers + D1 (SQLite)
+- **Database**: Drizzle ORM (11 tables)
+- **Auth**: Web Crypto HMAC sessions (edge-compatible)
+- **Admin**: Custom admin panel with inline-styled dashboard
+
+## Quick Start (Local)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd gptc-next
+npm install
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The site reads from a local D1 database. Seed it first:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npx wrangler d1 migrations apply gptc-db --local
+npx tsx scripts/seed.ts
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Admin login**: `admin` / `admin123` at `/admin/login`
 
-## Learn More
+## Deploy to Cloudflare
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
+- [Cloudflare account](https://dash.cloudflare.com)
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/) (`npx wrangler login`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Step 1: Create D1 Database
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npx wrangler d1 create gptc-db
+```
 
-## Deploy on Vercel
+Copy the `database_id` from the output and paste it into `wrangler.jsonc`:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```jsonc
+"d1_databases": [{
+  "binding": "DB",
+  "database_name": "gptc-db",
+  "database_id": "your-database-id-here",  // ← replace this
+  "migrations_dir": "drizzle/migrations"
+}]
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Step 2: Set AUTH_SECRET
+
+```bash
+npx wrangler secret put AUTH_SECRET
+# Enter a random string, e.g. output of: openssl rand -hex 32
+```
+
+### Step 3: Apply Migrations & Seed
+
+```bash
+npm run db:migrate:remote
+npm run deploy            # builds + deploys to Workers
+```
+
+### Step 4: Seed Remote Database
+
+```bash
+# Export local DB and import to remote
+npx wrangler d1 export gptc-db --local --output seed-dump.sql
+npx wrangler d1 execute gptc-db --remote --file seed-dump.sql
+```
+
+## Project Structure
+
+```
+gptc-next/
+├── src/
+│   ├── app/
+│   │   ├── admin/          # Admin panel (dashboard + CRUD pages)
+│   │   │   ├── login/      # Login page (/admin/login)
+│   │   │   ├── api/auth/   # Auth API route
+│   │   │   └── (dashboard)/ # All CRUD pages (sections, events, etc.)
+│   │   ├── api/            # API routes
+│   │   ├── department/[slug]/ # Dynamic department pages
+│   │   ├── principal/      # Principal page
+│   │   ├── diploma/        # Diploma programmes page
+│   │   └── ...             # Faculty pages, etc.
+│   ├── components/         # React components
+│   ├── db/                 # Drizzle schema + DB connection
+│   ├── lib/                # Auth utilities, DB queries
+│   └── hooks/              # Custom React hooks
+├── drizzle/                # D1 migrations
+├── scripts/                # Seed script
+├── wrangler.jsonc          # Cloudflare Workers config
+└── public/                 # Static assets
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `AUTH_SECRET` | Secret key for session HMAC signing (set via `wrangler secret`) |
+
+## Build
+
+```bash
+npm run build    # next build --webpack
+```
+
+Uses webpack bundler for Cloudflare compatibility.
+
+## Backup
+
+The original Vite/React codebase is preserved in `PROJECTS/Gptc` on the `backup-before-next` branch.
